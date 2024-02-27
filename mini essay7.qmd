@@ -1,0 +1,102 @@
+---
+title: "Navigating Data Integrity: From Simulation to Inference Amidst Unforeseen Anomalies"
+title-block-banner: true
+thanks: "Code and data supporting this analysis are available at: https://github.com/CSCmaster/mini-essay-7/pulls"
+author: "Jingyi Shen"
+date: today
+date-format: long
+format: pdf
+toc: true
+toc-depth: 2
+number-sections: true
+bibliography: references.bib
+link-citations: true
+---
+
+```{r setup, include=FALSE}
+install.packages("beepr", quiet = TRUE)
+install.packages("broom", quiet = TRUE)
+install.packages("broom.mixed", quiet = TRUE)
+install.packages("knitr", quiet = TRUE)
+install.packages("modelsummary", quiet = TRUE)
+install.packages("purrr", quiet = TRUE)
+install.packages("rstanarm", quiet = TRUE)
+install.packages("testthat", quiet = TRUE)
+install.packages("tidyverse", quiet = TRUE)
+library(beepr)
+library(broom)
+library(broom.mixed)
+library(knitr)
+library(modelsummary)
+library(purrr)
+library(rstanarm)
+library(testthat)
+library(tidyverse)
+
+```
+
+```{r, include=FALSE}
+set.seed(853)
+initial_draws <- rnorm(n = 900, mean = 1, sd = 1)
+final_draws <- c(initial_draws, initial_draws[1:100])
+library(tibble)
+normal_example <- tibble(draws = final_draws)
+str(normal_example)
+head(normal_example)
+tail(normal_example)
+```
+
+```{r, include=FALSE}
+set.seed(853)
+initial_draws <- rnorm(n = 900, mean = 1, sd = 1)
+final_draws <- c(initial_draws, initial_draws[1:100])
+library(tibble)
+normal_example <- tibble(draws = final_draws)
+str(normal_example)
+head(normal_example)
+tail(normal_example)
+```
+
+```{r, include=FALSE}
+set.seed(853)  
+negative_indices <- which(normal_example$draws < 0)
+selected_indices <- sample(negative_indices, length(negative_indices) / 2)
+normal_example$draws[selected_indices] <- abs(normal_example$draws[selected_indices])
+summary(normal_example$draws)
+
+
+
+```
+
+```{r, include=FALSE}
+library(dplyr)
+
+normal_example <- normal_example %>%
+  mutate(draws = ifelse(draws >= 1 & draws <= 1.1, draws / 10, draws))
+summary(normal_example$draws)
+
+
+
+```
+
+```{r, include=FALSE}
+t_test_result <- t.test(normal_example$draws, mu = 0, alternative = "greater")
+print(t_test_result)
+
+
+
+```
+
+# Analysis
+
+In this analytical journey, we embarked on an exploration that encapsulates the essence of data science: simulation, manipulation, and inference, all while navigating through unintended data anomalies. The initial phase involved simulating a dataset to mimic a real-world scenario where observations stem from a normal distribution with a specified mean and standard deviation. This simulation was conceived to generate 1,000 observations. However, an instrumental quirk capped the memory at 900 observations, leading to the overwriting of the final 100 entries with the first 100. This peculiar limitation mimicked potential real-world data collection issues, where hardware or software constraints might inadvertently alter the dataset.
+
+Upon receiving the dataset, a research assistant was tasked with data cleaning and preparation, a crucial step in ensuring data quality. Unbeknownst to us, two significant errors occurred during this phase. Firstly, half of the negative values were accidentally converted to positive, introducing a systematic bias that skewed the data distribution. Secondly, an error in decimal placement altered values between 1 and 1.1, drastically reducing them. These mistakes could have profound implications on the analysis, potentially leading to erroneous conclusions. For instance, the conversion of negative values to positive would artificially inflate the mean, while the decimal place error could introduce a subtle but systematic distortion in the dataset.
+
+After addressing these issues, the final analytical step aimed to ascertain whether the mean of the true data generating process was significantly greater than 0, employing a one-sample t-test[@kim2015t]. This statistical method provided a formal mechanism to test our hypothesis against the observed data, considering the accidental alterations made during the cleaning process. The t-test's outcome hinged on the assumption that the dataset, albeit manipulated, still reflected the underlying data generating process accurately enough for meaningful inference[@kim2015t].
+
+The inadvertent errors introduced during the data cleaning phase underscore the paramount importance of rigorous data validation and verification protocols. To mitigate such risks in future analyses, several strategies can be implemented. Automated data checks can serve as an early warning system, flagging potential anomalies for review. Implementing a more robust review process, perhaps involving multiple team members, can increase the likelihood of catching errors before they impact the analysis. Additionally, maintaining detailed documentation of all data manipulation steps can aid in tracing back and correcting any mistakes, enhancing the reproducibility and credibility of the analysis.
+
+This experience highlights the delicate balance between data integrity and the analytical objectives that guide our inquiry. The mean of the true data generating process is greater than 0.It serves as a reminder of the challenges inherent in working with real-world data, where errors and anomalies can lurk beneath the surface. By adopting comprehensive data management practices, we can navigate these challenges more effectively, ensuring that our analyses remain robust and our conclusions sound.
+
+# Reference
